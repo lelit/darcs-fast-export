@@ -78,6 +78,10 @@ third line"
 	_drrec -a -m "remove and rename"
 	darcs mv a b
 	_drrecamend
+	echo c > c
+	darcs add c
+	# empty commit message
+	_drrec -a -m ""
 	cd ..
 }
 
@@ -150,6 +154,7 @@ create_hg()
 	hg pull ../$1.tmp
 	hg merge
 	echo D > file
+	hg resolve -m file
 	echo "first line
 second line
 third line" | hg commit -l /dev/stdin
@@ -172,6 +177,12 @@ third line" | hg commit -l /dev/stdin
 	hg commit -m "add empty file"
 	hg rm file3
 	hg commit -m "remove file"
+	mkdir subdir
+	echo test > subdir/file
+	hg add subdir/file
+	hg commit -m "add subdir file"
+	echo test2 > subdir/file
+	hg commit -m "commit with weird date" -d "Fri Apr 03 12:38:26 2009 +1300"
 	cd ..
 }
 create_git()
@@ -226,12 +237,14 @@ diff_git()
 
 diff_importgit()
 {
+	test -z "`(cd $1.darcs; darcs diff)`" &&
 	diff --exclude _darcs --exclude .git --exclude '*-darcs-backup*' -Nur $1 $1.darcs
 	return $?
 }
 
 diff_importhg()
 {
+	test -z "`(cd $1.darcs; darcs diff)`" &&
 	diff --exclude _darcs --exclude .hg --exclude '*-darcs-backup*' --exclude 'hg-export.*' \
 		--exclude '.hgtags' --exclude '*.orig' -Nur $1 $1.darcs
 	return $?
@@ -239,12 +252,14 @@ diff_importhg()
 
 diff_importdarcs()
 {
+	test -z "`(cd $1.darcs; darcs diff)`" &&
 	diff --exclude _darcs --exclude '*-darcs-backup*' -Nur $1 $2
 	return $?
 }
 
 diff_importbzr()
 {
+	test -z "`(cd $1.darcs; darcs diff)`" &&
 	diff --exclude _darcs --exclude .bzr --exclude '*-darcs-backup*' -Nur $1 $1.darcs
 	return $?
 }
@@ -260,6 +275,7 @@ diff_bzr()
 
 diff_hg()
 {
+	hg -R $1.hg update
 	diff --exclude _darcs --exclude .hg --exclude '*-darcs-backup*' -Nur $1.hg $1
 	return $?
 }

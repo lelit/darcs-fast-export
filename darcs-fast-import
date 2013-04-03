@@ -4,7 +4,7 @@
 
     darcs-fast-export - darcs backend for fast data exporters
 
-    Copyright (c) 2008 Miklos Vajna <vmiklos@frugalware.org>
+    Copyright (c) 2008, 2009, 2010 Miklos Vajna <vmiklos@frugalware.org>
     Copyright (c) 2008 Matthias Andree <matthias.andree@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
@@ -81,6 +81,11 @@ class Handler:
 		raise Exception(s)
 
 	def get_date(self, ts, tz):
+		# first fix the case when tz is higher than +1200, as
+		# darcs won't accept it
+		if int(tz[:3]) > 12:
+			ts = str(int(ts) + 60*60*24)
+			tz = str(int(tz[:3])-24) + tz[3:]
                 # int(ts) is seconds since epoch. Since we're trying to
                 # capture both the absolute time of the commit and the
                 # localtime in the timezone of the committer, we need to turn
@@ -196,6 +201,9 @@ class Handler:
 			elif self.line.startswith("M "):
 				items = self.line.split(' ')
 				path = items[3][:-1]
+				dir = os.path.split(path)[0]
+				if len(dir) and not os.path.exists(dir):
+					os.makedirs(dir)
 				sock = open(path, "w")
 				if items[2] != "inline":
 					idx = int(items[2][1:])
