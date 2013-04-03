@@ -10,7 +10,7 @@ _drrec()
 
 _drrec_multiline()
 {
-	echo -e "`LANG= LC_ALL= date +"%a %b %d %H:%M:%S %Z %Y"`
+	echo "`LANG= LC_ALL= date +"%a %b %d %H:%M:%S %Z %Y"`
 $DARCS_EMAIL
 $@" | darcs rec --ignore-times -a --pipe .
 }
