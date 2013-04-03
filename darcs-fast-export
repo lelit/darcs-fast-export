@@ -61,8 +61,8 @@ class Handler:
 			for i in lines[0].childNodes[0].data.split('\n'):
 				if not i.startswith("Ignore-this: "):
 					ret.append(i)
-                if len(ret) > 1:
-                        ret.insert(1, u"")
+		if len(ret) > 1:
+			ret.insert(1, u"")
 		return "\n".join(ret).encode('utf-8')
 
 	def get_author(self, patch):
@@ -146,7 +146,7 @@ class Handler:
 			return open(path)
 		else:
 			return urllib.urlopen(path)
-	
+
 	def handle_opts(self):
 		# Option Parser
 		usage="%prog [options] darcsrepo"
@@ -217,13 +217,13 @@ class Handler:
 				self.import_marks.append(line.split(' ')[1])
 				self.export_marks.append(line)
 			sock.close()
-	
+
 	def get_patches(self):
 		self.progress("getting list of patches")
 		if not len(self.import_marks):
 			sock = os.popen("darcs changes --xml --reverse --repo %s" % self.origin)
 		else:
-			sock = os.popen("darcs changes --xml --reverse  --repo %s --from-match 'hash %s'" % (self.origin, self.import_marks[-1]))
+			sock = os.popen("darcs changes --xml --reverse	--repo %s --from-match 'hash %s'" % (self.origin, self.import_marks[-1]))
 		buf = sock.read()
 		sock.close()
 		# this is hackish. we need to escape some bad chars, otherwise the xml
@@ -275,48 +275,48 @@ class Handler:
 			os.chdir(self.working)
 		if self.options.import_marks:
 			sock = os.popen("darcs pull -a --match 'hash %s' %s" % (self.import_marks[-1], self.origin))
-                        # note that this only pulls in one patch, not others that might sit
-                        # before it. I think it was intended to update the --working repo up
-                        # to the point we were at after the previous dfe run. This will fail
-                        # if we've pushed (git-to-darcs) more than one non-interdependent
-                        # patch since the last pull (darcs-to-git): this will pull the latest
-                        # one, but not the ones before that.
-                        #  start:
-                        #   darcs=AB, --working=AB, git=AB, import_marks[-1]=B
-                        #  add C,D to git
-                        #   darcs=AB, --working=AB, git=ABCD, import_marks[-1]=B
-                        #  push git-to-darcs (git-fast-export|darcs-fast-import), pushes C+D
-                        #   darcs=ABCD, --working=AB, git=ABCD, import_marks[-1]=D
-                        #  add E to darcs
-                        #   darcs=ABCDE, --working=AB, git=ABCD, import_marks[-1]=D
-                        #  pull darcs-to-git (darcs-fast-export|git-fast-import)
-                        #   this 'darcs pull' pulls D (the last thing pushed to darcs)
-                        #   darcs=ABCDE, --working=ABD, git=ABCD, import_marks[-1]=D
-                        #   then send/apply E
-                        #   darcs=ABCDE, --working=ABDE, git=ABCD, import_marks[-1]=D
-                        #   then the state of all files are copied into git state E, reverting
-                        #    the D-provided git patch (so git[E] = A+B+C+E = darcs[E]-D)
-                        #   darcs=ABCDE, --working=ABDE, git=ABCE, import_marks[-1]=E
+			# note that this only pulls in one patch, not others that might sit
+			# before it. I think it was intended to update the --working repo up
+			# to the point we were at after the previous dfe run. This will fail
+			# if we've pushed (git-to-darcs) more than one non-interdependent
+			# patch since the last pull (darcs-to-git): this will pull the latest
+			# one, but not the ones before that.
+			#  start:
+			#   darcs=AB, --working=AB, git=AB, import_marks[-1]=B
+			#  add C,D to git
+			#   darcs=AB, --working=AB, git=ABCD, import_marks[-1]=B
+			#  push git-to-darcs (git-fast-export|darcs-fast-import), pushes C+D
+			#   darcs=ABCD, --working=AB, git=ABCD, import_marks[-1]=D
+			#  add E to darcs
+			#   darcs=ABCDE, --working=AB, git=ABCD, import_marks[-1]=D
+			#  pull darcs-to-git (darcs-fast-export|git-fast-import)
+			#   this 'darcs pull' pulls D (the last thing pushed to darcs)
+			#   darcs=ABCDE, --working=ABD, git=ABCD, import_marks[-1]=D
+			#   then send/apply E
+			#   darcs=ABCDE, --working=ABDE, git=ABCD, import_marks[-1]=D
+			#   then the state of all files are copied into git state E, reverting
+			#    the D-provided git patch (so git[E] = A+B+C+E = darcs[E]-D)
+			#   darcs=ABCDE, --working=ABDE, git=ABCE, import_marks[-1]=E
 
-                        # really, we want to keep the --working repo up to date. To do that
-                        # on just the darcs-to-git direction is tricky. We need to know not
-                        # only the last entry in import_marks[], but every entry that was
-                        # added by git-to-darcs since the last time we updated this repo.
+			# really, we want to keep the --working repo up to date. To do that
+			# on just the darcs-to-git direction is tricky. We need to know not
+			# only the last entry in import_marks[], but every entry that was
+			# added by git-to-darcs since the last time we updated this repo.
 
-                        # one possibility is to record the mark number of import_marks[-1] at
-                        # the end of darcs darcs-to-git run. Then, at the begnning of the
-                        # next run, find everything that's listed past that. None of these
-                        # should be in the --working repo yet: they all came from git and
-                        # were sent over to darcs by git-to-darcs. Pull all of those into
-                        # --working; now this repo is up-to-date. Then, check to see what the
-                        # darcs repo has for us, and apply+transfer them one at a time.
-                        # Update import_marks at the end of this process.
-                        #
-                        # store the number.. somewhere.
+			# one possibility is to record the mark number of import_marks[-1] at
+			# the end of darcs darcs-to-git run. Then, at the begnning of the
+			# next run, find everything that's listed past that. None of these
+			# should be in the --working repo yet: they all came from git and
+			# were sent over to darcs by git-to-darcs. Pull all of those into
+			# --working; now this repo is up-to-date. Then, check to see what the
+			# darcs repo has for us, and apply+transfer them one at a time.
+			# Update import_marks at the end of this process.
+			#
+			# store the number.. somewhere.
 
 			self.log("Building/updating working directory:\n%s" % sock.read())
 			sock.close()
-	
+
 	def export_patches(self):
 		patches = self.get_patches()
 		# this is the number of the NEXT patch
@@ -398,7 +398,7 @@ class Handler:
 		if not self.options.export_marks:
 			shutil.rmtree(self.working)
 		self.logsock.close()
-	
+
 	def handle_export_marks(self):
 		if self.options.export_marks:
 			self.progress("writing export marks")

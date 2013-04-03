@@ -185,6 +185,7 @@ third line" | hg commit -l /dev/stdin
 	hg commit -m "commit with weird date" -d "Fri Apr 03 12:38:26 2009 +1300"
 	cd ..
 }
+
 create_git()
 {
 	rm -rf $1
