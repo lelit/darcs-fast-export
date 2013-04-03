@@ -232,7 +232,7 @@ diff_git()
 {
 	rm -rf $1.git.nonbare
 	git clone -q $1.git $1.git.nonbare
-	diff --exclude _darcs --exclude .git --exclude '*-darcs-backup*' -Nur $1.git.nonbare $1
+	diff --exclude _darcs --exclude .git --exclude '*-darcs-backup*' --exclude '*.~?~' -Nur $1.git.nonbare $1
 	return $?
 }
 
@@ -270,7 +270,7 @@ diff_bzr()
 	cd $1.bzr/trunk
 	bzr update
 	cd - >/dev/null
-	diff --exclude _darcs --exclude .bzr --exclude '*-darcs-backup*' -Nur $1.bzr/trunk $1
+	diff --exclude _darcs --exclude .bzr --exclude '*-darcs-backup*' --exclude '*.~?~' -Nur $1.bzr/trunk $1
 	return $?
 }
 
