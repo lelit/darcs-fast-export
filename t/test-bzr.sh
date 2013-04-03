@@ -1,6 +1,6 @@
 . ./lib.sh
 
-create_darcs test --old-fashioned-inventory
+create_darcs test --hashed
 
 rm -rf test.darcs test.bzr
 mkdir test.bzr

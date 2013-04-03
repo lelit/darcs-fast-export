@@ -270,7 +270,7 @@ class Handler:
 			if darcs2:
 				os.system("darcs init --darcs-2")
 			else:
-				os.system("darcs init --old-fashioned-inventory")
+				os.system("darcs init --hashed")
 		else:
 			os.chdir(self.working)
 		if self.options.import_marks:
